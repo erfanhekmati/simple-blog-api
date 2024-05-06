@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -20,6 +21,23 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
+
+  public async refreshTokens(id: number, rt: string): Promise<Tokens> {
+    // Validate refresh tokens
+    const user = await this.validateRefreshTokens(id, rt);
+
+    // Get new tokens
+    const tokens = await this.getTokens(
+      user.id,
+      user.email,
+      user.roles as Role[],
+    );
+
+    // Update refresh token
+    await this.updateRtHash(user.id, tokens.refresh_token);
+
+    return tokens;
+  }
 
   public async signIn(username: string, password: string): Promise<Tokens> {
     // Validate user
@@ -117,5 +135,16 @@ export class AuthService {
       if (passMatches) return user;
     }
     return null;
+  }
+
+  private async validateRefreshTokens(id: number, rt: string): Promise<User> {
+    const user = await this.prismaService.user.findUnique({ where: { id } });
+    if (!user) throw new ForbiddenException('Access denied.');
+
+    // Compare refresh tokens
+    const rtMatches = await bcrypt.compare(rt, user.hashedRt);
+    if (!rtMatches) throw new ForbiddenException('Access denied.');
+
+    return user;
   }
 }
