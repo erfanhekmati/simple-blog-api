@@ -1,8 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SignInDto, SignUpDto } from './dtos';
-import { Public } from './decorators';
+import { CurrentUser, Public } from './decorators';
+import { JwtRefreshAuthGuard } from './guards';
+import { Tokens } from './types';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -21,5 +23,17 @@ export class AuthController {
   @Post('signin')
   signIn(@Body() body: SignInDto) {
     return this.authService.signIn(body.email, body.password);
+  }
+
+  @Public()
+  @ApiOperation({ summary: 'Refresh tokens' })
+  @UseGuards(JwtRefreshAuthGuard)
+  @ApiBearerAuth()
+  @Post('refresh-tokens')
+  refreshToken(
+    @CurrentUser('userId') userId: number,
+    @CurrentUser('refreshToken') refreshToken: string,
+  ): Promise<Tokens> {
+    return this.authService.refreshTokens(userId, refreshToken);
   }
 }
