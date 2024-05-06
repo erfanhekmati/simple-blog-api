@@ -148,7 +148,7 @@ export class AuthService {
 
   private async validateRefreshTokens(id: number, rt: string): Promise<User> {
     const user = await this.prismaService.user.findUnique({ where: { id } });
-    if (!user) throw new ForbiddenException('Access denied.');
+    if (!user || !user.hashedRt) throw new ForbiddenException('Access denied.');
 
     // Compare refresh tokens
     const rtMatches = await bcrypt.compare(rt, user.hashedRt);
