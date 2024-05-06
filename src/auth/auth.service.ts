@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { SignUpInterface } from './interfaces';
 import { Tokens } from './types';
 import { hashData } from 'src/common/utils';
@@ -6,6 +10,8 @@ import { Role } from './enums';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma.service';
+import * as bcrypt from 'bcrypt';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +20,26 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
+
+  public async signIn(username: string, password: string): Promise<Tokens> {
+    // Validate user
+    const user = await this.validateUser(username, password);
+
+    if (!user)
+      throw new UnauthorizedException('Email or password is incorrect.');
+
+    // Get new tokens
+    const tokens = await this.getTokens(
+      user.id,
+      user.email,
+      user.roles as Role[],
+    );
+
+    // Update refresh token
+    await this.updateRtHash(user.id, tokens.refresh_token);
+
+    return tokens;
+  }
 
   public async signUp({
     email,
@@ -79,5 +105,17 @@ export class AuthService {
       where: { id },
       data: { hashedRt: await hashData(rt) },
     });
+  }
+
+  private async validateUser(
+    email: string,
+    password: string,
+  ): Promise<User | null> {
+    const user = await this.prismaService.user.findUnique({ where: { email } });
+    if (user) {
+      const passMatches = await bcrypt.compare(password, user.password);
+      if (passMatches) return user;
+    }
+    return null;
   }
 }
