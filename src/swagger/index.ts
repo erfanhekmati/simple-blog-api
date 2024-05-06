@@ -1,6 +1,7 @@
 import { INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+const { SwaggerTheme, SwaggerThemeNameEnum } = require('swagger-themes');
 
 export function SwaggerIntialize(app: INestApplication<any>) {
   const configService = app.get(ConfigService);
@@ -13,6 +14,7 @@ export function SwaggerIntialize(app: INestApplication<any>) {
     .build();
 
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  const theme = new SwaggerTheme();
 
   const swaggerOptions = {
     swaggerOptions: {
@@ -33,6 +35,8 @@ export function SwaggerIntialize(app: INestApplication<any>) {
         return result;
       },
     },
+    explorer: true,
+    customCss: theme.getBuffer(configService.get('swagger.theme')),
   };
 
   SwaggerModule.setup(

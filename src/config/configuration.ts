@@ -8,5 +8,6 @@ export default () => ({
     description:
       'This provides comprehensive documentation for all blog services API',
     path: 'api-docs',
+    theme: 'dark',
   },
 });
