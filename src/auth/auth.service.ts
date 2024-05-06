@@ -22,6 +22,15 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
+  public async signOut(id: number) {
+    const user = await this.prismaService.user.findUnique({ where: { id } });
+    if (!user) throw new ForbiddenException('Access denied.');
+    await this.prismaService.user.update({
+      where: { id },
+      data: { hashedRt: null },
+    });
+  }
+
   public async refreshTokens(id: number, rt: string): Promise<Tokens> {
     // Validate refresh tokens
     const user = await this.validateRefreshTokens(id, rt);
