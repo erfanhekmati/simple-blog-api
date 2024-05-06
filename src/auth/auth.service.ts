@@ -22,6 +22,12 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
+  public async findMe(userId: number) {
+    const { id, email, firstName, lastName } =
+      await this.prismaService.user.findUnique({ where: { id: userId } });
+    return { id, email, firstName, lastName };
+  }
+
   public async signOut(id: number) {
     const user = await this.prismaService.user.findUnique({ where: { id } });
     if (!user) throw new ForbiddenException('Access denied.');
