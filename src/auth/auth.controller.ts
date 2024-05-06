@@ -36,4 +36,11 @@ export class AuthController {
   ): Promise<Tokens> {
     return this.authService.refreshTokens(userId, refreshToken);
   }
+
+  @ApiOperation({ summary: 'Signs out the signed in user' })
+  @ApiBearerAuth()
+  @Post('signout')
+  async signOut(@CurrentUser('userId') userId: number) {
+    return this.authService.signOut(userId);
+  }
 }
