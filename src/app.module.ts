@@ -8,6 +8,7 @@ import { JwtAuthGuard, RolesGuard } from './auth/guards';
 import { BlogsModule } from './blogs/blogs.module';
 import { EmailsModule } from './emails/emails.module';
 import { BullModule } from '@nestjs/bull';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { BullModule } from '@nestjs/bull';
       load: [configuration],
       isGlobal: true,
     }),
+    EventEmitterModule.forRoot(),
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
