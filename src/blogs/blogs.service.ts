@@ -1,26 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class BlogsService {
-  create(createBlogDto: CreateBlogDto) {
-    return 'This action adds a new blog';
+  constructor(private readonly prismaService: PrismaService) {}
+
+  public create(
+    authorId: number,
+    { title, description, article, tags }: CreateBlogDto,
+  ) {
+    return this.prismaService.blog.create({
+      data: { title, description, article, tags, authorId },
+    });
   }
 
-  findAll() {
-    return `This action returns all blogs`;
+  public findAll(authorId: number) {
+    return this.prismaService.blog.findMany({ where: { authorId } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} blog`;
+  public async findOne(authorId: number, id: number) {
+    const blog = await this.prismaService.blog.findUnique({
+      where: { authorId, id },
+    });
+    if (!blog) throw new NotFoundException('Blog not found.');
+    return blog;
   }
 
-  update(id: number, updateBlogDto: UpdateBlogDto) {
-    return `This action updates a #${id} blog`;
+  public async update(
+    authorId: number,
+    id: number,
+    updateBlogDto: UpdateBlogDto,
+  ) {
+    await this.findOne(authorId, id);
+    return this.prismaService.blog.update({
+      where: { authorId, id },
+      data: updateBlogDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} blog`;
+  public async remove(authorId: number, id: number) {
+    await this.findOne(authorId, id);
+    return this.prismaService.blog.delete({
+      where: { authorId, id },
+    });
   }
 }
