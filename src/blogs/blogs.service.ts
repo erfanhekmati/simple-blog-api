@@ -40,25 +40,64 @@ export class BlogsService {
 
   public async findAll(authorId?: number) {
     if (authorId)
-      return this.prismaService.blog.findMany({
-        where: { authorId },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          tags: true,
-          createdAt: true,
-          updatedAt: true,
-          viewCount: true,
+      return (
+        await this.prismaService.blog.findMany({
+          where: { authorId },
+          include: { comments: true },
+        })
+      ).map(
+        ({
+          id,
+          title,
+          description,
+          tags,
+          createdAt,
+          updatedAt,
+          viewCount,
+          comments,
+        }) => {
+          return {
+            id,
+            title,
+            description,
+            tags,
+            createdAt,
+            updatedAt,
+            viewCount,
+            commentsCount: comments.length,
+          };
         },
-      });
+      );
     return (
       await this.prismaService.blog.findMany({
-        include: { author: { select: { firstName: true, lastName: true } } },
+        include: {
+          author: { select: { firstName: true, lastName: true } },
+          comments: true,
+        },
       })
-    ).map(({ id, title, description, tags, createdAt, viewCount, author }) => {
-      return { id, title, description, tags, createdAt, viewCount, author };
-    });
+    ).map(
+      ({
+        id,
+        title,
+        description,
+        tags,
+        createdAt,
+        viewCount,
+        author,
+        comments,
+      }) => {
+        return {
+          id,
+          title,
+          description,
+          tags,
+          createdAt,
+          viewCount,
+          author,
+          commentsCount: comments.length,
+        };
+      },
+    );
   }
 
   public async findOne(authorId: number, id: number) {
