@@ -8,5 +8,6 @@ import { AtStrategy, RtStrategy } from './strategies';
 @Module({
   providers: [AuthService, PrismaService, JwtService, AtStrategy, RtStrategy],
   controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule {}

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SignUpInterface } from './interfaces';
@@ -21,6 +22,14 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
+
+  public async getUserEmailById(userId: number): Promise<string> {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user) throw new NotFoundException('User not found.');
+    return user.email;
+  }
 
   public async findMe(userId: number) {
     const { id, email, firstName, lastName } =
