@@ -5,13 +5,15 @@ import { PrismaService } from 'src/prisma.service';
 import { WriteCommentDto } from './dto';
 import { AuthService } from 'src/auth/auth.service';
 import { EmailsService } from 'src/emails/emails.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CommentAddedEvent } from './events';
 
 @Injectable()
 export class BlogsService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly authService: AuthService,
-    private readonly emailsService: EmailsService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   public async writeComment(
@@ -28,8 +30,10 @@ export class BlogsService {
       },
     });
 
-    // Send email to author
-    await this.emailsService.sendCommentAddedEmail(authorEmail, blogId);
+    await this.eventEmitter.emit(
+      'comment.added',
+      new CommentAddedEvent(authorId, authorEmail, blogId),
+    );
 
     const { id, createdAt } = comment;
     return { id, content, createdAt, authorEmail };
