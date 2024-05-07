@@ -7,10 +7,16 @@ import {
   Delete,
   Put,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { BlogsService } from './blogs.service';
 import { CurrentUser } from 'src/auth/decorators';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateBlogDto, UpdateBlogDto, WriteCommentDto } from './dto';
 
 @ApiTags('Blogs')
@@ -30,16 +36,24 @@ export class BlogsController {
 
   @ApiOperation({ summary: 'Finds all blogs' })
   @ApiBearerAuth()
+  @ApiQuery({ required: false, name: 'page', type: Number })
+  @ApiQuery({ required: false, name: 'pageSize', type: Number })
   @Get()
-  findAllCurrentUser(@CurrentUser('userId') userId: number) {
-    return this.blogsService.findAll(userId);
+  findAllCurrentUser(
+    @CurrentUser('userId') userId: number,
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,
+  ) {
+    return this.blogsService.findAll(page, pageSize);
   }
 
   @ApiOperation({ summary: 'Finds all blogs' })
   @ApiBearerAuth()
+  @ApiQuery({ required: false, name: 'page', type: Number })
+  @ApiQuery({ required: false, name: 'pageSize', type: Number })
   @Get('all')
-  findAll() {
-    return this.blogsService.findAll();
+  findAll(@Query('page') page: number, @Query('pageSize') pageSize: number) {
+    return this.blogsService.findAll(page, pageSize);
   }
 
   @ApiOperation({ summary: 'Finds the blog by id' })

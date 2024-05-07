@@ -48,10 +48,24 @@ export class BlogsService {
     });
   }
 
-  public async findAll(authorId?: number) {
+  public async findAll(
+    page: number = 1,
+    pageSize: number = 10,
+    authorId?: number,
+  ) {
+    if (isNaN(page) || page < 1) {
+      page = 1;
+    }
+    if (isNaN(pageSize) || pageSize < 1 || pageSize > 30) {
+      pageSize = 10;
+    }
+
+    const skip = (page - 1) * pageSize;
     if (authorId)
       return (
         await this.prismaService.blog.findMany({
+          take: pageSize,
+          skip: skip,
           where: { authorId },
           include: { comments: true },
         })
@@ -80,6 +94,8 @@ export class BlogsService {
       );
     return (
       await this.prismaService.blog.findMany({
+        take: pageSize,
+        skip: skip,
         include: {
           author: { select: { firstName: true, lastName: true } },
           comments: true,
