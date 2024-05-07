@@ -77,6 +77,48 @@ export class BlogsService {
     };
   }
 
+  public async view(id: number) {
+    const blog = await this.prismaService.blog.findUnique({
+      where: { id },
+      include: {
+        comments: {
+          select: {
+            id: true,
+            authorEmail: true,
+            content: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+    if (!blog) throw new NotFoundException('Blog not found.');
+
+    // Increment view count
+    await this.updateViewCount(id, blog.viewCount + 1);
+
+    const {
+      title,
+      description,
+      article,
+      tags,
+      createdAt,
+      updatedAt,
+      viewCount,
+      comments,
+    } = blog;
+    return {
+      id,
+      title,
+      description,
+      article,
+      tags,
+      createdAt,
+      updatedAt,
+      viewCount: viewCount + 1,
+      comments,
+    };
+  }
+
   public async update(
     authorId: number,
     id: number,
@@ -132,5 +174,12 @@ export class BlogsService {
       updatedAt,
       viewCount,
     };
+  }
+
+  private async updateViewCount(id: number, viewCount: number) {
+    await this.prismaService.blog.update({
+      where: { id },
+      data: { viewCount },
+    });
   }
 }

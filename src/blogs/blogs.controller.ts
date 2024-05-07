@@ -53,6 +53,13 @@ export class BlogsController {
     return this.blogsService.findOne(userId, id);
   }
 
+  @ApiOperation({ summary: 'Views the blog by id' })
+  @ApiBearerAuth()
+  @Get(':id/view')
+  view(@Param('id', ParseIntPipe) id: number) {
+    return this.blogsService.view(id);
+  }
+
   @ApiOperation({ summary: 'Updates the blog by id' })
   @ApiBearerAuth()
   @Put(':id')
