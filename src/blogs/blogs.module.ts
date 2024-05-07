@@ -6,7 +6,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { EmailsModule } from 'src/emails/emails.module';
 
 @Module({
-  imports: [AuthModule, EmailsModule],
+  imports: [AuthModule],
   controllers: [BlogsController],
   providers: [BlogsService, PrismaService],
 })
