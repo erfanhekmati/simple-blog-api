@@ -42,9 +42,39 @@ export class BlogsService {
   public async findOne(authorId: number, id: number) {
     const blog = await this.prismaService.blog.findUnique({
       where: { authorId, id },
+      include: {
+        comments: {
+          select: {
+            id: true,
+            authorEmail: true,
+            content: true,
+            createdAt: true,
+          },
+        },
+      },
     });
     if (!blog) throw new NotFoundException('Blog not found.');
-    return blog;
+    const {
+      title,
+      description,
+      article,
+      tags,
+      createdAt,
+      updatedAt,
+      viewCount,
+      comments,
+    } = blog;
+    return {
+      id,
+      title,
+      description,
+      article,
+      tags,
+      createdAt,
+      updatedAt,
+      viewCount,
+      comments,
+    };
   }
 
   public async update(
