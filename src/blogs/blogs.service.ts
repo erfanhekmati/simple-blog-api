@@ -83,16 +83,54 @@ export class BlogsService {
     updateBlogDto: UpdateBlogDto,
   ) {
     await this.findOne(authorId, id);
-    return this.prismaService.blog.update({
+    const blog = await this.prismaService.blog.update({
       where: { authorId, id },
       data: updateBlogDto,
     });
+    const {
+      title,
+      description,
+      article,
+      tags,
+      createdAt,
+      updatedAt,
+      viewCount,
+    } = blog;
+    return {
+      id,
+      title,
+      description,
+      article,
+      tags,
+      createdAt,
+      updatedAt,
+      viewCount,
+    };
   }
 
   public async remove(authorId: number, id: number) {
     await this.findOne(authorId, id);
-    return this.prismaService.blog.delete({
+    const blog = await this.prismaService.blog.delete({
       where: { authorId, id },
     });
+    const {
+      title,
+      description,
+      article,
+      tags,
+      createdAt,
+      updatedAt,
+      viewCount,
+    } = blog;
+    return {
+      id,
+      title,
+      description,
+      article,
+      tags,
+      createdAt,
+      updatedAt,
+      viewCount,
+    };
   }
 }
