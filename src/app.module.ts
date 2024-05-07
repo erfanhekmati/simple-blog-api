@@ -6,12 +6,19 @@ import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
 import { JwtAuthGuard, RolesGuard } from './auth/guards';
 import { BlogsModule } from './blogs/blogs.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
       isGlobal: true,
+    }),
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
     }),
     AuthModule,
     BlogsModule,
