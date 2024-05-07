@@ -16,10 +16,26 @@ export class BlogsService {
     });
   }
 
-  public findAll(authorId?: number) {
+  public async findAll(authorId?: number) {
     if (authorId)
-      return this.prismaService.blog.findMany({ where: { authorId } });
-    return this.prismaService.blog.findMany();
+      return this.prismaService.blog.findMany({
+        where: { authorId },
+        select: {
+          title: true,
+          description: true,
+          tags: true,
+          createdAt: true,
+          updatedAt: true,
+          viewCount: true,
+        },
+      });
+    return (
+      await this.prismaService.blog.findMany({
+        include: { author: { select: { firstName: true, lastName: true } } },
+      })
+    ).map(({ title, description, tags, createdAt, viewCount, author }) => {
+      return { title, description, tags, createdAt, viewCount, author };
+    });
   }
 
   public async findOne(authorId: number, id: number) {
