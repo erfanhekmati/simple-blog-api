@@ -21,6 +21,7 @@ export class BlogsService {
       return this.prismaService.blog.findMany({
         where: { authorId },
         select: {
+          id: true,
           title: true,
           description: true,
           tags: true,
@@ -33,8 +34,8 @@ export class BlogsService {
       await this.prismaService.blog.findMany({
         include: { author: { select: { firstName: true, lastName: true } } },
       })
-    ).map(({ title, description, tags, createdAt, viewCount, author }) => {
-      return { title, description, tags, createdAt, viewCount, author };
+    ).map(({ id, title, description, tags, createdAt, viewCount, author }) => {
+      return { id, title, description, tags, createdAt, viewCount, author };
     });
   }
 
