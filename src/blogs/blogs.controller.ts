@@ -32,8 +32,15 @@ export class BlogsController {
   @ApiOperation({ summary: 'Finds all blogs' })
   @ApiBearerAuth()
   @Get()
-  findAll(@CurrentUser('userId') userId: number) {
+  findAllCurrentUser(@CurrentUser('userId') userId: number) {
     return this.blogsService.findAll(userId);
+  }
+
+  @ApiOperation({ summary: 'Finds all blogs' })
+  @ApiBearerAuth()
+  @Get('all')
+  findAll() {
+    return this.blogsService.findAll();
   }
 
   @ApiOperation({ summary: 'Finds the blog by id' })

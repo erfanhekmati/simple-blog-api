@@ -16,8 +16,10 @@ export class BlogsService {
     });
   }
 
-  public findAll(authorId: number) {
-    return this.prismaService.blog.findMany({ where: { authorId } });
+  public findAll(authorId?: number) {
+    if (authorId)
+      return this.prismaService.blog.findMany({ where: { authorId } });
+    return this.prismaService.blog.findMany();
   }
 
   public async findOne(authorId: number, id: number) {
