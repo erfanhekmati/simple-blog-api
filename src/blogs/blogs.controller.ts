@@ -34,7 +34,7 @@ export class BlogsController {
     return this.blogsService.create(userId, createBlogDto);
   }
 
-  @ApiOperation({ summary: 'Finds all blogs' })
+  @ApiOperation({ summary: "Finds current user's blogs" })
   @ApiBearerAuth()
   @ApiQuery({ required: false, name: 'page', type: Number })
   @ApiQuery({ required: false, name: 'pageSize', type: Number })
@@ -56,7 +56,7 @@ export class BlogsController {
     return this.blogsService.findAll(page, pageSize);
   }
 
-  @ApiOperation({ summary: 'Finds the blog by id' })
+  @ApiOperation({ summary: "Finds current user's blog by id" })
   @ApiBearerAuth()
   @Get(':id')
   findOne(
