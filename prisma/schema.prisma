@@ -31,7 +31,7 @@ model Blog {
   description String
   article     String
   tags        String[]
-  viewCount   Int
+  viewCount   Int?      @default(0)
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId    Int
   comments    Comment[]
