@@ -9,10 +9,9 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { BlogsService } from './blogs.service';
-import { CreateBlogDto } from './dto/create-blog.dto';
-import { UpdateBlogDto } from './dto/update-blog.dto';
 import { CurrentUser } from 'src/auth/decorators';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CreateBlogDto, UpdateBlogDto, WriteCommentDto } from './dto';
 
 @ApiTags('Blogs')
 @Controller('blogs')
@@ -79,5 +78,16 @@ export class BlogsController {
     @CurrentUser('userId') userId: number,
   ) {
     return this.blogsService.remove(userId, id);
+  }
+
+  @ApiOperation({ summary: 'Writes a comment for a blog by id' })
+  @ApiBearerAuth()
+  @Post(':id/comment')
+  writeComment(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: WriteCommentDto,
+    @CurrentUser('userId') userId: number,
+  ) {
+    return this.blogsService.writeComment(userId, id, body);
   }
 }

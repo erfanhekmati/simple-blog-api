@@ -2,10 +2,32 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { PrismaService } from 'src/prisma.service';
+import { WriteCommentDto } from './dto';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class BlogsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly authService: AuthService,
+  ) {}
+
+  public async writeComment(
+    authorId: number,
+    blogId: number,
+    { content }: WriteCommentDto,
+  ) {
+    const authorEmail = await this.authService.getUserEmailById(authorId);
+    const comment = await this.prismaService.comment.create({
+      data: {
+        content,
+        authorEmail,
+        blogId,
+      },
+    });
+    const { id, createdAt } = comment;
+    return { id, content, createdAt, authorEmail };
+  }
 
   public create(
     authorId: number,
