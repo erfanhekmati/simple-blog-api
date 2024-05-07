@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
 import { JwtAuthGuard, RolesGuard } from './auth/guards';
 import { BlogsModule } from './blogs/blogs.module';
+import { EmailsModule } from './emails/emails.module';
 import { BullModule } from '@nestjs/bull';
 
 @Module({
@@ -22,6 +23,7 @@ import { BullModule } from '@nestjs/bull';
     }),
     AuthModule,
     BlogsModule,
+    EmailsModule,
   ],
   controllers: [AppController],
   providers: [
