@@ -4,12 +4,14 @@ import { UpdateBlogDto } from './dto/update-blog.dto';
 import { PrismaService } from 'src/prisma.service';
 import { WriteCommentDto } from './dto';
 import { AuthService } from 'src/auth/auth.service';
+import { EmailsService } from 'src/emails/emails.service';
 
 @Injectable()
 export class BlogsService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly authService: AuthService,
+    private readonly emailsService: EmailsService,
   ) {}
 
   public async writeComment(
@@ -25,6 +27,10 @@ export class BlogsService {
         blogId,
       },
     });
+
+    // Send email to author
+    await this.emailsService.sendCommentAddedEmail(authorEmail, blogId);
+
     const { id, createdAt } = comment;
     return { id, content, createdAt, authorEmail };
   }
