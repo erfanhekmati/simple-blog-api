@@ -61,69 +61,57 @@ export class BlogsService {
     }
 
     const skip = (page - 1) * pageSize;
-    if (authorId)
-      return (
-        await this.prismaService.blog.findMany({
-          take: pageSize,
-          skip: skip,
-          where: { authorId },
-          include: { comments: true },
-        })
-      ).map(
-        ({
-          id,
-          title,
-          description,
-          tags,
-          createdAt,
-          updatedAt,
-          viewCount,
-          comments,
-        }) => {
-          return {
-            id,
-            title,
-            description,
-            tags,
-            createdAt,
-            updatedAt,
-            viewCount,
-            commentsCount: comments.length,
-          };
-        },
-      );
-    return (
-      await this.prismaService.blog.findMany({
-        take: pageSize,
-        skip: skip,
-        include: {
-          author: { select: { firstName: true, lastName: true } },
-          comments: true,
-        },
-      })
-    ).map(
-      ({
-        id,
-        title,
-        description,
-        tags,
-        createdAt,
-        viewCount,
-        author,
-        comments,
-      }) => {
-        return {
-          id,
-          title,
-          description,
-          tags,
-          createdAt,
-          viewCount,
-          author,
-          commentsCount: comments.length,
-        };
-      },
-    );
+    if (authorId) {
+      return await this.prismaService.$queryRaw`
+      SELECT
+        b."id",
+        b."title",
+        b."description",
+        b."tags",
+        b."viewCount",
+        b."createdAt",
+        b."updatedAt",
+        CAST((
+          SELECT COUNT(*)
+          FROM "Comment" c
+          WHERE c."blogId" = b."id"
+        ) AS INT) AS "commentsCount",
+        json_build_object(
+          'email', u."email",
+          'firstName', u."firstName",
+          'lastName', u."lastName"
+        ) AS "author"
+      FROM "Blog" b
+      JOIN "User" u ON u."id" = b."authorId"
+      WHERE b."authorId" = ${authorId}
+      OFFSET ${skip}
+      LIMIT ${pageSize};
+    `;
+    }
+
+    return await this.prismaService.$queryRaw`
+      SELECT
+        b."id",
+        b."title",
+        b."description",
+        b."tags",
+        b."viewCount",
+        b."createdAt",
+        CAST((
+          SELECT COUNT(*)
+          FROM "Comment" c
+          WHERE c."blogId" = b."id"
+        ) AS INT) AS "commentsCount",
+        json_build_object(
+          'email', u."email",
+          'firstName', u."firstName",
+          'lastName', u."lastName"
+        ) AS "author"
+      FROM "Blog" b
+      JOIN "User" u ON u."id" = b."authorId"
+      OFFSET ${skip}
+      LIMIT ${pageSize}
+    `;
   }
 
   public async findOne(authorId: number, id: number) {
