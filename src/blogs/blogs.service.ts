@@ -165,6 +165,9 @@ export class BlogsService {
   }
 
   public async view(id: number) {
+    // Increment view count
+    await this.updateViewCount(id);
+
     const blog = await this.prismaService.blog.findUnique({
       where: { id },
       include: {
@@ -179,9 +182,6 @@ export class BlogsService {
       },
     });
     if (!blog) throw new NotFoundException('Blog not found.');
-
-    // Increment view count
-    await this.updateViewCount(id, blog.viewCount + 1);
 
     const {
       title,
@@ -201,7 +201,7 @@ export class BlogsService {
       tags,
       createdAt,
       updatedAt,
-      viewCount: viewCount + 1,
+      viewCount,
       comments,
     };
   }
@@ -263,10 +263,12 @@ export class BlogsService {
     };
   }
 
-  private async updateViewCount(id: number, viewCount: number) {
-    await this.prismaService.blog.update({
-      where: { id },
-      data: { viewCount },
-    });
+  private async updateViewCount(id: number) {
+    await this.prismaService.$executeRaw`
+      UPDATE "Blog"
+      SET "viewCount" = "viewCount" + 1
+      WHERE id = ${id}
+      RETURNING "viewCount";
+    `;
   }
 }
